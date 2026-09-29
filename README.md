@@ -23,17 +23,25 @@ This repository contains two independent packages that are run side by side:
 
 ## Architecture
 
-```
-   Producers                    Hub (devlog_ui_server)                 Consumers
- ┌──────────────────┐                                          ┌────────────────────┐
- │ Node / any svc   │── POST /log ───────────────────────────┐  │                    │
- │ (curl, fetch,    │                                         │  │  Next.js dashboard │
- │  axios, ...)     │                                         ├─▶│  live log stream   │
- ├──────────────────┤                                         │  │  metrics + filters │
- │ Browser app      │── socket.emit('log') ─────────────────┘  │  error spotlight   │
- │ (console, onerror│                                           │  AI explanations   │
- │  unhandledrej.)  │◀── socket 'new-log' (broadcast: all) ─────▶  │  log detail modal  │
- └──────────────────┘        POST /api/ai/explain (Gemini)        └────────────────────┘
+```mermaid
+flowchart LR
+    subgraph producers[Producers]
+        service["Node / any service<br/>curl · fetch · axios"]
+        browser["Browser app<br/>console · onerror · unhandledrejection"]
+    end
+
+    hub["Log hub<br/>devlog_ui_server"]
+
+    subgraph consumers[Consumers]
+        dashboard["Next.js dashboard<br/>live stream · metrics · filters<br/>error spotlight · log details"]
+    end
+
+    service -->|POST /log| hub
+    browser -->|"socket.emit('log')"| hub
+    hub -->|new-log broadcast| browser
+    hub -->|new-log broadcast| dashboard
+    dashboard -->|POST /api/ai/explain| hub
+    hub -.->|Gemini explanation| dashboard
 ```
 
 - The hub is **stateless and memory-only**. It normalizes, logs to stdout, and rebroadcasts; it

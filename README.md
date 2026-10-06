@@ -1,5 +1,9 @@
 # Devlog Stream
 
+<p align="center">
+  <img src="./devlog.png" alt="Devlog Stream dashboard" width="1200" />
+</p>
+
 Real-time log aggregation and monitoring. A lightweight Socket.io hub that ingests logs from any
 service (REST, WebSocket, or an in-browser console interceptor) and fans them out to a live
 "command center" dashboard, with optional AI-powered root-cause explanations.
